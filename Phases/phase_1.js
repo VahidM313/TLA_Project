@@ -34,3 +34,40 @@ transitions = transitions.map((i) => {
 
 console.log(final_states);
 console.table(transTable);
+
+// convert epsilon NFA to NFA
+
+const closureTable = [];
+
+transTable.forEach((state) => {
+  let closure = [];
+  closure.push(state[0], state[1], state[2]);
+  if (state[3] !== "") {
+    let epsilonMove = state[3].split(",");
+    for (let epsilon of epsilonMove) {
+      if (
+        final_states.find((st) => st === epsilon) !== undefined &&
+        final_states.find((st) => st === state[0]) === undefined
+      )
+        final_states.push(state[0]);
+      while (epsilon !== "") {
+        for (let epsilonState of transTable) {
+          if (epsilonState[0] === epsilon) {
+            if (closure[1] === "") closure[1] += epsilonState[1];
+            else if (epsilonState[1] !== "")
+              closure[1] += "," + epsilonState[1];
+            if (closure[2] === "") closure[2] += epsilonState[2];
+            else if (epsilonState[2] !== "")
+              closure[2] += "," + epsilonState[2];
+            epsilon = epsilonState[3];
+            break;
+          }
+        }
+      }
+    }
+  }
+  closureTable.push(closure);
+});
+
+console.log(final_states);
+console.table(closureTable);
