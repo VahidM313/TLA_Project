@@ -1,6 +1,6 @@
-const data = require("./../samples/phase1-sample/in/input1.json");
+const data = require("./../samples/phase1-sample/in/input2.json");
 
-// parsing json 
+// parsing json
 
 const states = data.states.replace(/'|{|}/g, "").split(",");
 const input_symbols = data.input_symbols.replace(/'|{|}/g, "").split(",");
@@ -23,8 +23,8 @@ transitions = transitions.map((i) => {
   i[1].forEach((element) => {
     if (element[0] === "") element[0] = "λ";
     if (element[0] === "λ") column[3] += element[1];
-    else if (element[0] === "a") column[1] += element[1];
-    else if (element[0] === "b") column[2] += element[1];
+    else if (element[0] === input_symbols[0]) column[1] += element[1];
+    else if (element[0] === input_symbols[1]) column[2] += element[1];
   });
   transTable.push(column);
   column = [null, "", "", ""];
@@ -32,7 +32,6 @@ transitions = transitions.map((i) => {
   return i;
 });
 
-console.log(final_states);
 console.table(transTable);
 
 // convert epsilon NFA to NFA
@@ -53,6 +52,7 @@ transTable.forEach((state) => {
       while (epsilon !== "") {
         for (let epsilonState of transTable) {
           if (epsilonState[0] === epsilon) {
+            closure[0] += "," + epsilon;
             if (closure[1] === "") closure[1] += epsilonState[1];
             else if (epsilonState[1] !== "")
               closure[1] += "," + epsilonState[1];
@@ -65,9 +65,135 @@ transTable.forEach((state) => {
         }
       }
     }
+    closure[0] = closure[0].split(",").sort();
+    let ns = "";
+    for (let x of closure[0]) ns += x;
+    closure[0] = ns;
+    const xs = state[0];
+    transTable.map((x) => {
+      if (x[0].search(xs) !== -1) x[0] = x[0].replace(xs, ns);
+      if (x[1].search(xs) !== -1) x[1] = x[1].replace(xs, ns);
+      if (x[2].search(xs) !== -1) x[2] = x[2].replace(xs, ns);
+      if (x[3].search(xs) !== -1) x[3] = x[3].replace(xs, ns);
+      return x;
+    });
+    closureTable.map((x) => {
+      if (x[0].search(xs) !== -1) x[0] = x[0].replace(xs, ns);
+      if (x[1].search(xs) !== -1) x[1] = x[1].replace(xs, ns);
+      if (x[2].search(xs) !== -1) x[2] = x[2].replace(xs, ns);
+      return x;
+    });
   }
   closureTable.push(closure);
 });
 
-console.log(final_states);
 console.table(closureTable);
+
+// convert nfa to dfa
+
+transTable = [];
+let newState = [];
+
+const convert = (state) => {
+  let st = [state[0]];
+  let ns = "";
+  state[1] = state[1].split(",").sort();
+  for (let x of state[1]) {
+    if (ns.search(x) === -1) ns += x;
+  }
+  if (state[1].length > 1) {
+    if (!transTable.find((x) => x[0] === ns) && ns !== state[0])
+      newState.push(ns);
+  }
+  if (ns === "") st.push("TRAP");
+  else st.push(ns);
+  ns = "";
+  state[2] = state[2].split(",").sort();
+  for (let x of state[2]) {
+    if (ns.search(x) === -1) ns += x;
+  }
+  if (state[2].length > 1) {
+    if (!transTable.find((x) => x[1] === ns) && ns !== state[0])
+      newState.push(ns);
+  }
+  if (ns === "") st.push("TRAP");
+  else st.push(ns);
+
+  transTable.push(st);
+};
+
+let remain = [];
+
+const transform = (state) => {
+
+  convert(state);
+
+  while (newState.length !== 0) {
+    const i = newState.length - 1;
+    let trans = [newState[i]];
+    let flag = false;
+    for (let x of transTable) {
+      if (x[0] === trans[0]) {
+        flag = true;
+        break;
+      }
+    }
+    if (!flag) {
+      let a = "",
+        b = "";
+      for (let i = 0; i < trans[0].length; i += 2) {
+        let q = "";
+        for (let j = trans[0].length; j >= i + 2; j -= 2) {
+          q = trans[0].substring(i, j);
+          if (closureTable.find((x) => x[0] === q)) break;
+        }
+        for (let x of closureTable) {
+          if (x[0] === q) {
+            if (x[1] !== "") {
+              if (a === "") a += x[1];
+              else a += "," + x[1];
+            }
+            if (x[2] !== "") {
+              if (b === "") b += x[2];
+              else b += "," + x[2];
+            }
+            break;
+          }
+        }
+      }
+      trans.push(a, b);
+      newState.pop();
+      convert(trans);
+    } else newState.pop();
+  }
+}
+
+for (let state of closureTable) {
+  if (
+    state[0] !== "q0" &&
+    !transTable.find((x) => {
+      if (state[0] === x[0]) return true;
+      if (x[1] !== "TRAP" && state[0] === x[1]) return true;
+      if (x[2] !== "TRAP" && state[0] === x[2]) return true;
+      return false;
+    })
+  ) {
+    remain.push(state);
+    continue;
+  }
+
+  transform(state);
+}
+
+while(remain.length !== 0) {
+  let i = remain.length-1;
+  if(transTable.find(x => x[1] === remain[i][1] || x[2] === remain[i][2]))
+    transform(remain[i]);
+  remain.pop();
+}
+
+transTable.push(["TRAP", "TRAP", "TRAP"]);
+
+console.table(transTable);
+
+
