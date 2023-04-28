@@ -1,4 +1,4 @@
-const data = require("./../samples/phase1-sample/in/input2.json");
+const data = require("./../samples/phase1-sample/in/input1.json");
 
 // parsing json
 
@@ -196,4 +196,43 @@ transTable.push(["TRAP", "TRAP", "TRAP"]);
 
 console.table(transTable);
 
+newState = "{";
+let newFinalState = "{";
+let newTransitions = {};
+let newInputSymbol = data.input_symbols;
+let newInitialState = data.initial_state;
+transTable.forEach(x => {
+  newState += '\'' + x[0] + '\',';
+  for(let y of final_states) {
+    if(x[0].includes(y)) {
+      newFinalState += '\'' + x[0] + '\',';
+      break;
+    }
+  }
+  let no = {};
+  no[input_symbols[0]] = x[1];
+  no[input_symbols[1]] = x[2];
+  newTransitions[x[0]] = no;
+});
 
+newFinalState = newFinalState.slice(0,-1) + "}";
+newState = newState.slice(0,-1) + "}";
+
+console.log(newState);
+console.log(newFinalState);
+console.log(newTransitions);
+
+const json = require('fs');
+
+const jsonData = JSON.stringify({
+  "states": newState,
+  "input_symbols":newInputSymbol,
+  "transitions": newTransitions,
+  "initial_state": newInitialState,
+  "final_states": newFinalState
+}, null, 2);
+
+json.writeFile('Phases/phase_1.json', jsonData, (err) => {
+  if (err) throw err;
+  console.log('Data written to file');
+});
