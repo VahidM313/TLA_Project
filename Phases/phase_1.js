@@ -196,4 +196,21 @@ transTable.push(["TRAP", "TRAP", "TRAP"]);
 
 console.table(transTable);
 
+newState = [];
+let newFinalState = [];
+let newTransitions = {};
+transTable.forEach(x => {
+  newState.push(x[0]);
+  final_states.forEach(y => {
+    if(x[0].includes(y))
+      newFinalState.push(x[0]);
+  })
+  let no = {};
+  no[input_symbols[0]] = x[1];
+  no[input_symbols[1]] = x[2];
+  newTransitions[x[0]] = no;
+});
 
+console.log(newState);
+console.log(newFinalState);
+console.log(newTransitions);
