@@ -153,3 +153,42 @@ for (let md of miniDFA) {
   }
 }
 console.table(miniDFA);
+
+// create output json
+
+newState = "{";
+let newFinalState = "{";
+let newTransitions = {};
+let newInputSymbol = data.input_symbols;
+let newInitialState = data.initial_state;
+miniDFA.forEach(x => {
+  newState += '\'' + x[0] + '\',';
+  for(let y of final_states) {
+    if(x[0].includes(y)) {
+      newFinalState += '\'' + x[0] + '\',';
+      break;
+    }
+  }
+  let no = {};
+  no[input_symbols[0]] = x[1];
+  no[input_symbols[1]] = x[2];
+  newTransitions[x[0]] = no;
+});
+
+newFinalState = newFinalState.slice(0,-1) + "}";
+newState = newState.slice(0,-1) + "}";
+
+const json = require('fs');
+
+const jsonData = JSON.stringify({
+  "states": newState,
+  "input_symbols":newInputSymbol,
+  "transitions": newTransitions,
+  "initial_state": newInitialState,
+  "final_states": newFinalState
+}, null, 2);
+
+json.writeFile('Phases/phase_2.json', jsonData, (err) => {
+  if (err) throw err;
+  console.log('Data written to file');
+});
