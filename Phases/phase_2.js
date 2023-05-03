@@ -89,7 +89,7 @@ const arraysEqual = (arr1, arr2) => {
 
 const table = [...transTable];
 
-while (!arraysEqual(oldEqu,newEqu)) {
+while (!arraysEqual(oldEqu, newEqu)) {
   if (newEqu.length !== 0) oldEqu = newEqu;
   newEqu = [];
   let trans = [...table];
@@ -123,3 +123,33 @@ while (!arraysEqual(oldEqu,newEqu)) {
   console.table(oldEqu);
   console.table(newEqu);
 }
+
+console.table(transTable);
+
+// dfa minimization
+
+let finalEqu = [...newEqu];
+let miniDFA = [];
+for (let i = 0; i < finalEqu.length; i++) {
+  let state = finalEqu[i].join("");
+  let symb1 = "";
+  let symb2 = "";
+  for (let st of transTable) {
+    if (state.includes(st[0])) {
+      if (state.includes(st[1])) symb1 = state;
+      else symb1 = st[1];
+      if (state.includes(st[2])) symb2 = state;
+      else symb2 = st[2];
+    }
+  }
+  miniDFA.push([state, symb1, symb2]);
+  console.log(state, symb1, symb2);
+}
+for (let md of miniDFA) {
+  let state = md[0];
+  for (let m of miniDFA) {
+    if (state.includes(m[1])) m[1] = state;
+    if (state.includes(m[2])) m[2] = state;
+  }
+}
+console.table(miniDFA);
