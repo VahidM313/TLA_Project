@@ -30,20 +30,18 @@ transitions = transitions.map((i) => {
   return i;
 });
 
-console.table(transTable);
-
 // remove unreachable states
 
 let reachableState = [];
 
-for(let i of transTable) {
-  if(i[0] === "q0") {
+for (let i of transTable) {
+  if (i[0] === "q0") {
     reachableState.push("q0");
     continue;
   }
-  for(let j of transTable) {
-    if(i[0] !== j[0]) {
-      if(i[0] === j[1] || i[0] === j[2]) {
+  for (let j of transTable) {
+    if (i[0] !== j[0]) {
+      if (i[0] === j[1] || i[0] === j[2]) {
         reachableState.push(i[0]);
         break;
       }
@@ -51,48 +49,77 @@ for(let i of transTable) {
   }
 }
 
-transTable = transTable.filter(s => reachableState.includes(s[0]));
-states = states.filter(s => reachableState.includes(s));
-
-console.table(transTable);
+transTable = transTable.filter((s) => reachableState.includes(s[0]));
+states = states.filter((s) => reachableState.includes(s));
 
 // 0 Equivalence
 
 let equStates = states;
-let oldEqu = [[],[]];
+let oldEqu = [[], []];
 let newEqu = [];
 
-console.log(final_states);
-
-for(let i of states) {
-  if(final_states.includes(i))
-    oldEqu[1].push(i);
-  else
-    oldEqu[0].push(i);
+for (let i of states) {
+  if (final_states.includes(i)) oldEqu[1].push(i);
+  else oldEqu[0].push(i);
 }
-
-console.log(oldEqu);
 
 // find all equivalence
 
-while( oldEqu !== newEqu) {
-  if(newEqu !== [])
-    oldEqu = newEqu;
-  newEqu = [];
-  const numSets = Math.pow(2, oldEqu.length);
-  for(let i = 0; i<numSets; i++) 
-  newEqu.push([]);
-  for(let st of transTable) {
-    let index = '';
-    for(let eq of oldEqu)
-    { 
-      if(eq.includes(st[1]))
-        index += '1';
-      else
-        index += '0';
+const findIndex = (array, element) => {
+  for (let i = 0; i < array.length; i++) {
+    for (let j = 0; j < array[i].length; j++) {
+      if (array[i][j] === element) {
+        return i;
+      }
     }
-    console.log(index,parseInt(index, 2));
-    // newEqu[parseInt(index, 2)].push(st[0]);
   }
-  // console.log(newEqu);
+  return null;
+};
+
+const arraysEqual = (arr1, arr2) => {
+  if (arr1.length !== arr2.length) return false;
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i].length !== arr2[i].length) return false;
+    for (let j = 0; j < arr1[i].length; j++) {
+      if (arr1[i][j] !== arr2[i][j]) return false;
+    }
+  }
+  return true;
+};
+
+const table = [...transTable];
+
+while (!arraysEqual(oldEqu,newEqu)) {
+  if (newEqu.length !== 0) oldEqu = newEqu;
+  newEqu = [];
+  let trans = [...table];
+  newEqu.push([trans[0]]);
+  for (let t of trans) {
+    if (t === trans[0]) continue;
+    let flag = false;
+    for (let eq of newEqu) {
+      if (
+        findIndex(oldEqu, t[1]) === findIndex(oldEqu, eq[0][1]) &&
+        findIndex(oldEqu, t[2]) === findIndex(oldEqu, eq[0][2])
+      ) {
+        eq.push(t);
+        flag = true;
+        break;
+      }
+    }
+    if (!flag) {
+      newEqu.push([t]);
+    }
+  }
+  newEqu = newEqu.map((arr) => {
+    arr = arr.map((s) => {
+      s = s[0];
+      return s;
+    });
+    return arr;
+  });
+  delete trans;
+  console.log("================\n");
+  console.table(oldEqu);
+  console.table(newEqu);
 }
