@@ -32,3 +32,25 @@ transitions = transitions.map((i) => {
 
 console.table(transTable);
 
+// remove unreachable states
+
+let reachableState = [];
+
+for(let i of transTable) {
+  if(i[0] === "q0") {
+    reachableState.push("q0");
+    continue;
+  }
+  for(let j of transTable) {
+    if(i[0] !== j[0]) {
+      if(i[0] === j[1] || i[0] === j[2]) {
+        reachableState.push(i[0]);
+        break;
+      }
+    }
+  }
+}
+
+transTable = transTable.filter(s => reachableState.includes(s[0]));
+
+console.table(transTable);
