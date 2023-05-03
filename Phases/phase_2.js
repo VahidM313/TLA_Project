@@ -2,7 +2,7 @@ const data = require("./../samples/phase2-sample/in/input1.json");
 
 // parsing json
 
-const states = data.states.replace(/'|{|}/g, "").split(",");
+let states = data.states.replace(/'|{|}/g, "").split(",");
 const input_symbols = data.input_symbols.replace(/'|{|}/g, "").split(",");
 const initial_state = data.initial_state;
 const final_states = data.final_states.replace(/'|{|}/g, "").split(",");
@@ -52,5 +52,23 @@ for(let i of transTable) {
 }
 
 transTable = transTable.filter(s => reachableState.includes(s[0]));
+states = states.filter(s => reachableState.includes(s));
 
 console.table(transTable);
+
+// 0 Equivalence
+
+let equStates = states;
+let oldEqu = [[],[]];
+let newEqu = [];
+
+console.log(final_states);
+
+for(let i of states) {
+  if(final_states.includes(i))
+    oldEqu[1].push(i);
+  else
+    oldEqu[0].push(i);
+}
+
+console.log(oldEqu);

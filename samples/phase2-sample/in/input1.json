@@ -1,5 +1,5 @@
 {
-    "states": "{'q0','q1','q2','q3','q4'}",
+    "states": "{'q0','q1','q2','q3','q4','q5'}",
     "input_symbols": "{'0','1'}",
     "transitions": {
       "q0": {
