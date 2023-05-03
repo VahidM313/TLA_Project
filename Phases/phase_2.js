@@ -72,3 +72,27 @@ for(let i of states) {
 }
 
 console.log(oldEqu);
+
+// find all equivalence
+
+while( oldEqu !== newEqu) {
+  if(newEqu !== [])
+    oldEqu = newEqu;
+  newEqu = [];
+  const numSets = Math.pow(2, oldEqu.length);
+  for(let i = 0; i<numSets; i++) 
+  newEqu.push([]);
+  for(let st of transTable) {
+    let index = '';
+    for(let eq of oldEqu)
+    { 
+      if(eq.includes(st[1]))
+        index += '1';
+      else
+        index += '0';
+    }
+    console.log(index,parseInt(index, 2));
+    // newEqu[parseInt(index, 2)].push(st[0]);
+  }
+  // console.log(newEqu);
+}
