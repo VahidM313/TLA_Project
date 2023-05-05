@@ -1,5 +1,6 @@
 const FA = require("../samples/phase5-sample/in/FA.json");
-let result = FAtoRegex(FA);
+let equations = FAtoRegex(FA);
+let result = solveEquations(equations);
 console.log(result) 
 
 function FAtoRegex(FA) {
@@ -41,39 +42,9 @@ function FAtoRegex(FA) {
       rhs = rhs.slice(0, -1);
     }
     equations[state] = rhs;
+    console.log("state:"+state)
+    console.log("equations[state]:"+equations[state])
   }
 
-  // Solve the equation system using Arden's Lemma
-  function applyArden(equation) {
-    let parts = equation.split("+");
-    let r = "";
-    let q = "";
-    for (let part of parts) {
-      if (part.includes("q")) {
-        r += part.replace("q", "") + "+";
-      } else {
-        q += part;
-      }
-    }
-    r = r.slice(0, -1);
-    return q + (r === "" ? "" : r + "*");
-  }
-
-  // Solve the system of equations using Arden's Lemma
-  for (let state in equations) {
-    let equation = equations[state];
-    while (equation.includes("q")) {
-      let start = equation.indexOf("q");
-      let end = start + 1;
-      while (end < equation.length && equation[end] !== "+" && equation[end] !== ")") {
-        end++;
-      }
-      let subState = equation.slice(start, end);
-      let subEquation = equations[subState];
-      equation = equation.replace(subState, "(" + subEquation + ")");
-    }
-    equations[state] = applyArden(equation);
-  }
-
-  return equations[initial_state];
 }
+
