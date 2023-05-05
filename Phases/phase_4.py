@@ -52,6 +52,31 @@ def Star(fa):
     return json.dumps(fa_star_data)
 
 
+def Concat(fa1,fa2):
+    # Load the input FAs from JSON
+    with open(fa1, 'r') as fa_file:
+        fa1_data = json.load(fa_file)
+    with open(fa2, 'r') as fa_file:
+        fa2_data = json.load(fa_file)
+
+    #replace all q in FA2 with r
+    def replace_q_with_r(obj):
+        if isinstance(obj, dict):
+            return {k.replace('q', 'r'): replace_q_with_r(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [replace_q_with_r(elem) for elem in obj]
+        elif isinstance(obj, str):
+            return obj.replace('q', 'r')
+        else:
+            return obj
+
+    # Apply the function to the data
+    new_fa2_data = replace_q_with_r(fa2_data)
+    # Write the updated data to a new JSON file
+    with open('output.json', 'w') as f:
+        json.dump(new_fa2_data, f, indent=2)
+    
 #main
 
-Star("samples/phase4-sample/star/in/FA.json")
+#Star("samples/phase4-sample/star/in/FA.json")
+Concat("samples/phase4-sample/concat/in/FA1.json","samples/phase4-sample/concat/in/FA2.json")
