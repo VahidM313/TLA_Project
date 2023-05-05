@@ -192,7 +192,17 @@ while(remain.length !== 0) {
   remain.pop();
 }
 
-transTable.push(["TRAP", "TRAP", "TRAP"]);
+for(let t of transTable) {
+  if(t[1] === "TRAP" || t[2] === "TRAP") {
+    transTable.push(["TRAP", "TRAP", "TRAP"]);
+    break;
+  }
+}
+
+if(transTable.length === 0)
+  transTable = closureTable;
+
+console.table(transTable);
 
 console.table(transTable);
 
