@@ -1,4 +1,4 @@
-const data = require("./../samples/phase3-sample/in/input1.json");
+const data = require("./phase_3.json");
 
 // parsing json
 
@@ -7,6 +7,9 @@ const input_symbols = data.input_symbols.replace(/'|{|}/g, "").split(",");
 const initial_state = data.initial_state;
 const final_states = data.final_states.replace(/'|{|}/g, "").split(",");
 let transitions = Object.entries(data.transitions);
+const InputString = data.string;
+
+console.log(InputString)
 
 // convert transition object of json to transition table
 
@@ -31,7 +34,6 @@ transitions = transitions.map((i) => {
   i = i[1];
   return i;
 });
-
 
 // convert epsilon NFA to NFA
 
@@ -190,17 +192,28 @@ while(remain.length !== 0) {
   remain.pop();
 }
 
-transTable.push(["TRAP", "TRAP", "TRAP"]);
+for(let t of transTable) {
+  if(t[1] === "TRAP" || t[2] === "TRAP") {
+    transTable.push(["TRAP", "TRAP", "TRAP"]);
+    break;
+  }
+}
+
+if(transTable.length === 0)
+  transTable = closureTable;
+
 
 newState = "{";
 let newFinalState = "{";
 let newTransitions = {};
 let newInputSymbol = data.input_symbols;
+let newFinalStatesArray = [];
 let newInitialState = data.initial_state;
 transTable.forEach(x => {
   newState += '\'' + x[0] + '\',';
   for(let y of final_states) {
     if(x[0].includes(y)) {
+      newFinalStatesArray.push(x[0]);
       newFinalState += '\'' + x[0] + '\',';
       break;
     }
@@ -215,20 +228,29 @@ newFinalState = newFinalState.slice(0,-1) + "}";
 newState = newState.slice(0,-1) + "}";
 
 console.log(newState);
-console.log(newFinalState);
+console.log(newInitialState);
 console.log(newTransitions);
+console.log(newFinalStatesArray)
 
-const json = require('fs');
-
-const jsonData = JSON.stringify({
-  "states": newState,
-  "input_symbols":newInputSymbol,
-  "transitions": newTransitions,
-  "initial_state": newInitialState,
-  "final_states": newFinalState
-}, null, 2);
-
-json.writeFile('Phases/phase_1.json', jsonData, (err) => {
-  if (err) throw err;
-  console.log('Data written to file');
-});
+let CurrState = newInitialState;
+let queue = InputString.split("");
+check = true;
+while(queue.length > 0){
+  let CurrTransition = queue.shift();
+  if(!newTransitions[CurrState].hasOwnProperty(CurrTransition)){
+    check = false;
+    break;
+  }
+  CurrState = newTransitions[CurrState][CurrTransition];
+}
+if(check === false){
+  console.log("Rejected")
+}
+else {
+  if(newFinalState.includes(CurrState)){
+    console.log("Accepted")
+  }
+  else{
+    console.log("Rejected")
+  }
+}
