@@ -20,9 +20,16 @@ def Star(fa):
     new_final_state = 'qf'
     states.add(new_final_state)
 
-    #...
-    #for transitions
-    #...
+    # Add transitions form q* to the old initial state and qf by lambda.
+    transitions[new_initial_state] = { "": f"{{'{initial_state}','{new_final_state}'}}" }
+
+    # Add transition form qf to q* by lambda.
+    transitions[new_final_state] = { "":  f"{{'{new_initial_state}'}}" }
+
+
+    # Add transitions from the final states of the input FA to the new final state (qf)
+    for fs in final_states:
+            transitions[fs].update({ "":  f"{{'{new_final_state}'}}" })
 
     # Convert to strings for JSON output
     states_str = str(set(sorted(list(states)))).replace(" ","")
